@@ -10,6 +10,10 @@ local Gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
 Gui.Name = "M1Tracker"
 Gui.ResetOnSpawn = false
 
+-- =====================================================================
+-- الكود الأصلي (لم يتم المساس به)
+-- =====================================================================
+
 -- زرار فتح القائمة
 local Button = Instance.new("TextButton", Gui)
 Button.Size = UDim2.new(0,140,0,45)
@@ -253,10 +257,10 @@ end)
 
 
 -- =====================================================================
--- الإضافات الجديدة (بدون المساس بالكود الأصلي أو الزر القديم)
+-- الإضافات الجديدة (بدون المساس بالكود الأصلي)
 -- =====================================================================
 
--- دالة لسحب أي عنصر (لتستخدم للأزرار والواجهات الجديدة)
+-- دالة لسحب أي عنصر
 local function makeDraggable(obj)
 	local dragging, dragInput, dragStart, startPos
 	obj.InputBegan:Connect(function(input)
@@ -284,7 +288,7 @@ local function makeDraggable(obj)
 	end)
 end
 
--- 1. إنشاء زرين جديدين
+-- 1. إنشاء الأزرار الجديدة
 local Btn1 = Instance.new("TextButton", Gui)
 Btn1.Size = UDim2.new(0,140,0,45)
 Btn1.Position = UDim2.new(1,-160,0,75) -- تحت الزر الأصلي
@@ -306,6 +310,17 @@ Btn2.Font = Enum.Font.GothamBold
 Btn2.TextScaled = true
 Instance.new("UICorner", Btn2).CornerRadius = UDim.new(0,12)
 makeDraggable(Btn2)
+
+local Btn3 = Instance.new("TextButton", Gui)
+Btn3.Size = UDim2.new(0,140,0,45)
+Btn3.Position = UDim2.new(1,-160,0,185) -- تحت الزر الثاني
+Btn3.BackgroundColor3 = Color3.fromRGB(25,45,60)
+Btn3.Text = "⏱️ تعديل الوقت"
+Btn3.TextColor3 = Color3.new(1,1,1)
+Btn3.Font = Enum.Font.GothamBold
+Btn3.TextScaled = true
+Instance.new("UICorner", Btn3).CornerRadius = UDim.new(0,12)
+makeDraggable(Btn3)
 
 -- 2. إنشاء الواجهات الجديدة
 local FakeGuiFrame = Instance.new("Frame", Gui)
@@ -366,26 +381,71 @@ InfoLabel.Font = Enum.Font.GothamMedium
 InfoLabel.TextScaled = true
 InfoLabel.TextWrapped = true
 
--- 3. منطق فتح وغلق الواجهات
-local function toggleGui(frame)
-	frame.Visible = not frame.Visible
-end
+-- إنشاء واجهة تعديل الوقت
+local TimeGuiFrame = Instance.new("Frame", Gui)
+TimeGuiFrame.Size = UDim2.new(0,300,0,200)
+TimeGuiFrame.Position = UDim2.new(0.5,-150,0.5,-100)
+TimeGuiFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+TimeGuiFrame.Visible = false
+TimeGuiFrame.Active = true
+Instance.new("UICorner", TimeGuiFrame).CornerRadius = UDim.new(0,12)
+makeDraggable(TimeGuiFrame)
 
-Btn1.MouseButton1Click:Connect(function() toggleGui(FakeGuiFrame) end)
-Btn2.MouseButton1Click:Connect(function() toggleGui(InfoFrame) end)
+local TimeTitle = Instance.new("TextLabel", TimeGuiFrame)
+TimeTitle.Size = UDim2.new(1,0,0,35)
+TimeTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+TimeTitle.Text = "تعديل وقت اللاعب المسجل"
+TimeTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+TimeTitle.Font = Enum.Font.GothamBold
+TimeTitle.TextScaled = true
+TimeTitle.Parent = TimeGuiFrame
+Instance.new("UICorner", TimeTitle).CornerRadius = UDim.new(0,12)
 
--- 4. منطق التزوير المتناوب عند الضغط على Enter
-local ToggleStates = {} -- جدول لحفظ حالة كل لاعب (هل التالي خروج أم دخول؟)
+local TargetNameInput = Instance.new("TextBox", TimeGuiFrame)
+TargetNameInput.Size = UDim2.new(1,-40,0,35)
+TargetNameInput.Position = UDim2.new(0,20,0,50)
+TargetNameInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+TargetNameInput.PlaceholderText = "أكتب أول 3 أحرف من اسم اللاعب"
+TargetNameInput.Text = ""
+TargetNameInput.TextColor3 = Color3.new(1,1,1)
+TargetNameInput.Font = Enum.Font.GothamSemibold
+TargetNameInput.TextScaled = true
+Instance.new("UICorner", TargetNameInput).CornerRadius = UDim.new(0,6)
+
+local TargetTimeInput = Instance.new("TextBox", TimeGuiFrame)
+TargetTimeInput.Size = UDim2.new(1,-40,0,35)
+TargetTimeInput.Position = UDim2.new(0,20,0,95)
+TargetTimeInput.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+TargetTimeInput.PlaceholderText = "الوقت (مثال: 19:00:17)"
+TargetTimeInput.Text = ""
+TargetTimeInput.TextColor3 = Color3.new(1,1,1)
+TargetTimeInput.Font = Enum.Font.GothamSemibold
+TargetTimeInput.TextScaled = true
+Instance.new("UICorner", TargetTimeInput).CornerRadius = UDim.new(0,6)
+
+local ApplyTimeBtn = Instance.new("TextButton", TimeGuiFrame)
+ApplyTimeBtn.Size = UDim2.new(1,-40,0,35)
+ApplyTimeBtn.Position = UDim2.new(0,20,0,145)
+ApplyTimeBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+ApplyTimeBtn.Text = "تطبيق الوقت"
+ApplyTimeBtn.TextColor3 = Color3.new(1,1,1)
+ApplyTimeBtn.Font = Enum.Font.GothamBold
+ApplyTimeBtn.TextScaled = true
+Instance.new("UICorner", ApplyTimeBtn).CornerRadius = UDim.new(0,6)
+
+-- 3. ربط الأزرار بالواجهات
+Btn1.MouseButton1Click:Connect(function() FakeGuiFrame.Visible = not FakeGuiFrame.Visible end)
+Btn2.MouseButton1Click:Connect(function() InfoFrame.Visible = not InfoFrame.Visible end)
+Btn3.MouseButton1Click:Connect(function() TimeGuiFrame.Visible = not TimeGuiFrame.Visible end)
+
+-- 4. منطق التزوير المتناوب (الزر الأول)
+local ToggleStates = {} 
 
 InputBox.FocusLost:Connect(function(enterPressed)
 	if not enterPressed then return end
-
 	local searchText = string.lower(InputBox.Text)
 	if #searchText == 0 then return end
-
 	local targetPlayer = nil
-
-	-- البحث عن اللاعب بالحروف المكتوبة (سواء بالاسم أو الـ DisplayName)
 	for _, pl in pairs(Players:GetPlayers()) do
 		if string.sub(string.lower(pl.Name), 1, #searchText) == searchText or 
 		   string.sub(string.lower(pl.DisplayName), 1, #searchText) == searchText then
@@ -395,7 +455,6 @@ InputBox.FocusLost:Connect(function(enterPressed)
 	end
 
 	if targetPlayer then
-		-- التأكد أن اللاعب موجود في الواجهة الأصلية (مسجل في أحد المربعات الأربعة)
 		local isRegistered = false
 		local slotIndex = 0
 		for i = 1, 4 do
@@ -408,8 +467,6 @@ InputBox.FocusLost:Connect(function(enterPressed)
 
 		if isRegistered then
 			local userId = targetPlayer.UserId
-			
-			-- تهيئة الحالة إذا كان اللاعب جديد
 			if not ToggleStates[userId] then
 				ToggleStates[userId] = 0
 				if not AllPlayersStats[userId] then
@@ -417,34 +474,108 @@ InputBox.FocusLost:Connect(function(enterPressed)
 				end
 			end
 
-			-- زيادة عداد التبديل
 			ToggleStates[userId] = ToggleStates[userId] + 1
 			local step = ToggleStates[userId]
-
-			-- الحساب الرياضي للتناوب (خروج 1، دخول 1، خروج 2، دخول 2...)
 			local newLeave = math.floor((step + 1) / 2)
 			local newJoin = math.floor(step / 2)
 
-			-- تحديث البيانات الفعلية في السكربت
 			AllPlayersStats[userId].LeaveCount = newLeave
 			AllPlayersStats[userId].JoinCount = newJoin
 
-			-- تحديث الواجهة الأصلية فوراً
 			PlayersData[slotIndex].LeaveLabel.Text = "❌ الخروج: " .. newLeave
 			PlayersData[slotIndex].JoinLabel.Text = "✅ الدخول: " .. newJoin
 
-			-- تفريغ المربع للاستخدام مرة أخرى
 			InputBox.Text = ""
 		else
-			-- تنبيه إذا لم يكن اللاعب مسجلاً في الواجهة الأصلية
 			InputBox.Text = "اللاعب غير مسجل بالقائمة!"
 			task.wait(1)
 			InputBox.Text = ""
 		end
 	else
-		-- تنبيه إذا لم يتم العثور على اللاعب
 		InputBox.Text = "لم يتم العثور على اللاعب!"
 		task.wait(1)
 		InputBox.Text = ""
+	end
+end)
+
+-- 5. منطق تعديل الوقت (الزر الثالث)
+local function parseTimeString(timeStr)
+	local h, m, s = string.match(timeStr, "(%d+):(%d+):(%d+)")
+	if h and m and s then
+		return (tonumber(h) * 3600) + (tonumber(m) * 60) + tonumber(s)
+	end
+	return nil
+end
+
+local function applyCustomTime()
+	local searchText = string.lower(TargetNameInput.Text)
+	local timeString = TargetTimeInput.Text
+	
+	if #searchText == 0 then return end
+	local totalSeconds = parseTimeString(timeString)
+	
+	if not totalSeconds then
+		TargetTimeInput.Text = "صيغة خاطئة!"
+		task.wait(1)
+		TargetTimeInput.Text = ""
+		return
+	end
+	
+	local targetPlayer = nil
+	for _, pl in pairs(Players:GetPlayers()) do
+		if string.sub(string.lower(pl.Name), 1, #searchText) == searchText or 
+		   string.sub(string.lower(pl.DisplayName), 1, #searchText) == searchText then
+			targetPlayer = pl
+			break
+		end
+	end
+	
+	if targetPlayer then
+		local isRegistered = false
+		local slotIndex = 0
+		for i = 1, 4 do
+			if PlayersData[i].currentPlayer and PlayersData[i].currentPlayer.UserId == targetPlayer.UserId then
+				isRegistered = true
+				slotIndex = i
+				break
+			end
+		end
+		
+		if isRegistered then
+			local userId = targetPlayer.UserId
+			
+			-- تحديث الوقت
+			PlayersData[slotIndex].Time = totalSeconds
+			PlayersData[slotIndex].TimeLabel.Text = "⏱️ " .. formatTime(totalSeconds)
+			
+			-- إبقاء العداد يعمل
+			PlayersData[slotIndex].Running = true
+			
+			-- تحديث الجدول الرئيسي
+			if not AllPlayersStats[userId] then
+				AllPlayersStats[userId] = {JoinCount = 0, LeaveCount = 0, Time = 0}
+			end
+			AllPlayersStats[userId].Time = totalSeconds
+			
+			TargetNameInput.Text = ""
+			TargetTimeInput.Text = ""
+			TimeGuiFrame.Visible = false
+		else
+			TargetNameInput.Text = "غير مسجل بالقائمة!"
+			task.wait(1.5)
+			TargetNameInput.Text = ""
+		end
+	else
+		TargetNameInput.Text = "لم يتم العثور عليه!"
+		task.wait(1.5)
+		TargetNameInput.Text = ""
+	end
+end
+
+ApplyTimeBtn.MouseButton1Click:Connect(applyCustomTime)
+
+TargetTimeInput.FocusLost:Connect(function(enterPressed)
+	if enterPressed then
+		applyCustomTime()
 	end
 end)
